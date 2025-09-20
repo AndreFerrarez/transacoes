@@ -2,6 +2,8 @@ package infnet.wallet.wallet.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,9 +22,16 @@ public class Transacao {
     private Long id;
 
     private String tipo; // "DEPOSITO" ou "SAQUE"
+
+    @NotNull
+    @Positive
     private BigDecimal valor;
+
+    @NotNull
     private String moeda; // ex: "BTC", "ETH"
+
     private LocalDateTime data = LocalDateTime.now();
+
 
     public Transacao() {
     }
@@ -34,6 +43,5 @@ public class Transacao {
         this.moeda = moeda;
         this.data = data;
     }
-
 
 }

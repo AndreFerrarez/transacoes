@@ -75,6 +75,29 @@ O projeto segue uma arquitetura em três camadas para garantir a separação de 
 - `infnet.wallet.wallet.repository`: Camada de acesso a dados, responsável pela comunicação com o banco de dados através do Spring Data JPA.
 - `infnet.wallet.wallet.model`: Contém as entidades de domínio (JPA) que modelam os dados do negócio.
 
+
+
+
+## Camada de Persistência (TP01 - Entrega 2)
+
+### Decisões de projeto
+- Histórico implementado com entidade `TransacaoHistorico` + repositório.
+- Registro do histórico feito no Service para garantir que a gravação ocorra dentro de uma transação gerenciada pelo Spring.
+- Repositórios Spring Data com métodos `findByMoedaIgnoreCase`, `findByTipoIgnoreCase` para delegar ao banco as consultas.
+- Testes: `@DataJpaTest` para repositório e `@SpringBootTest` para integração do service com histórico.
+
+### Como usar
+- Endpoints:
+   - `POST /transacoes` — cria transação e grava histórico CREATE
+   - `PUT /transacoes` — atualizar (usar mesmo endpoint POST se aceitar body com id) grava histórico UPDATE
+   - `DELETE /transacoes/{id}` — grava histórico DELETE e exclui
+   - `GET /transacoes/{id}/historico` — retorna histórico da transação (mais recente primeiro)
+   - `GET /transacoes/historico/moeda/{moeda}` — histórico por moeda
+
+
+
+
+
 ## 👤 Autor
 
 Desenvolvido por **Andre A. Ferrarez**.
