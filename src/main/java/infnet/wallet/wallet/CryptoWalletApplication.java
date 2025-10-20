@@ -1,14 +1,11 @@
 package infnet.wallet.wallet;
 
-import infnet.wallet.wallet.model.Transacao;
-import infnet.wallet.wallet.repository.TransacaoRepository;
-import org.springframework.boot.CommandLineRunner;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
-import java.math.BigDecimal;
-
+@EnableFeignClients(basePackages = "infnet.wallet.wallet")
 @SpringBootApplication
 public class CryptoWalletApplication {
 

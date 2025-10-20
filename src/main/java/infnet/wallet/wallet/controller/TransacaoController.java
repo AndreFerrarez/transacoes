@@ -1,10 +1,11 @@
 package infnet.wallet.wallet.controller;
-import infnet.wallet.wallet.model.TransacaoHistorico;
+
+
 
 import infnet.wallet.wallet.model.Transacao;
 import infnet.wallet.wallet.service.TransacaoService;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
+
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,13 +40,4 @@ public class TransacaoController {
         service.excluir(id);
     }
 
-    @GetMapping("/{id}/historico")
-    public List<TransacaoHistorico> historicoDaTransacao(@PathVariable Long id) {
-        return service.historicoPorTransacao(id);
-    }
-
-    @GetMapping("/historico/moeda/{moeda}")
-    public List<TransacaoHistorico> historicoPorMoeda(@PathVariable String moeda) {
-        return service.historicoPorMoeda(moeda);
-    }
 }

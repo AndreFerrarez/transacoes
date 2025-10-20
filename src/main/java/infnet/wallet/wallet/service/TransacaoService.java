@@ -1,8 +1,8 @@
 package infnet.wallet.wallet.service;
 
+import infnet.wallet.wallet.dto.HistoricoDTO;
 import infnet.wallet.wallet.model.Transacao;
-import infnet.wallet.wallet.model.TransacaoHistorico;
-import infnet.wallet.wallet.repository.TransacaoHistoricoRepository;
+import infnet.wallet.wallet.historico.HistoricoPort;
 import infnet.wallet.wallet.repository.TransacaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,18 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
-
 @Service
 public class TransacaoService {
 
     private final TransacaoRepository repository;
-    private final TransacaoHistoricoRepository historicoRepository;
-
+    private final HistoricoPort historicoPort;
 
     public TransacaoService(TransacaoRepository repository,
-                            TransacaoHistoricoRepository historicoRepository) {
+                            HistoricoPort historicoPort) {
         this.repository = repository;
-        this.historicoRepository = historicoRepository;
+        this.historicoPort = historicoPort;
     }
 
     @Transactional
@@ -30,14 +28,18 @@ public class TransacaoService {
 
         Transacao saved = repository.save(t);
 
-        // registrar histórico
+        // registrar histórico via porta (sem acoplar a infra)
         String operacao = isCreate ? "CREATE" : "UPDATE";
-        TransacaoHistorico h = new TransacaoHistorico(saved.getId(), saved.getTipo(), saved.getValor(), saved.getMoeda(), operacao);
-        historicoRepository.save(h);
+        historicoPort.registrarHistorico(
+                saved.getId(),
+                saved.getTipo(),
+                saved.getValor(),
+                saved.getMoeda(),
+                operacao
+        );
 
         return saved;
     }
-
 
     public List<Transacao> listar() {
         return repository.findAll();
@@ -51,22 +53,28 @@ public class TransacaoService {
 
     @Transactional
     public void excluir(Long id) {
-        // Consultar antes para obter snapshot
-        Transacao t = repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Transacao não encontrada: " + id));
+        // snapshot antes de excluir
+        Transacao t = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Transacao não encontrada: " + id));
 
-        // registrar histórico antes de excluir
-        TransacaoHistorico h = new TransacaoHistorico(t.getId(), t.getTipo(), t.getValor(), t.getMoeda(), "DELETE");
-        historicoRepository.save(h);
+        // registrar histórico de DELETE via porta
+        historicoPort.registrarHistorico(
+                t.getId(),
+                t.getTipo(),
+                t.getValor(),
+                t.getMoeda(),
+                "DELETE"
+        );
 
         repository.deleteById(id);
     }
 
-    // endpoints utilitários para histórico
-    public List<TransacaoHistorico> historicoPorTransacao(Long transacaoId) {
-        return historicoRepository.findByTransacaoIdOrderByDataOperacaoDesc(transacaoId);
+    // consultas de histórico delegam à porta
+    public List<HistoricoDTO> historicoPorTransacao(Long transacaoId) {
+        return historicoPort.buscarPorTransacao(transacaoId);
     }
 
-    public List<TransacaoHistorico> historicoPorMoeda(String moeda) {
-        return historicoRepository.findByMoedaIgnoreCaseOrderByDataOperacaoDesc(moeda);
+    public List<HistoricoDTO> historicoPorMoeda(String moeda) {
+        return historicoPort.buscarPorMoeda(moeda);
     }
 }
