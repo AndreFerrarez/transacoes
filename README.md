@@ -6,6 +6,40 @@ Evoluir o projeto monolítico existente para uma **arquitetura de microsserviço
 Esta etapa demonstra a separação de responsabilidades, a comunicação entre serviços e a modularização do sistema.
 
 ---
+# 🧩 Etapa 4 — Refatoração para Arquitetura Orientada a Eventos
+
+## 📘 Contexto Geral
+Esta etapa refatora o sistema **Crypto Wallet**, transformando a comunicação entre os microsserviços `wallet-service` e `historico-service` em um modelo **orientado a eventos**, utilizando **RabbitMQ** como *message broker*.  
+O objetivo é aumentar **desempenho, escalabilidade e desacoplamento** entre os componentes do sistema.
+
+---
+
+## 🎯 Objetivo
+> Refatorar o sistema existente para uma **Arquitetura Orientada a Eventos**,  
+> substituindo as chamadas HTTP síncronas por **mensagens assíncronas** via RabbitMQ.
+
+## 🧩 Implementações Principais
+
+### 1. **Publicação de Eventos (wallet-service)**
+- Criado `TransacaoCriadaEvent` para representar as operações.
+- Implementado `TransacaoEventPublisher` com `RabbitTemplate` para enviar eventos.
+- Adicionado `Jackson2JsonMessageConverter` para enviar mensagens em JSON legível.
+- Ajustado `TransacaoService` para publicar eventos nos casos:
+  - `CREATE` → Nova transação criada
+  - `DELETE` → Transação removida
+
+### 2. **Consumo de Eventos (historico-service)**
+- Criado `TransacaoEventListener` com `@RabbitListener` para escutar a fila `transacoes.queue`.
+- Recebe os eventos JSON e persiste automaticamente em `TransacaoHistorico`.
+- Registro de todas as operações (`CREATE`, `DELETE`) no banco H2 (`historicodb`).
+
+### Para subir o container 
+- docker run -d --hostname rabbitmq-local --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+
+-Painel de controle: http://localhost:15672
+(Usuário: guest, Senha: guest)
+
+
 
 ## 🗂 Estrutura do Repositório
 
