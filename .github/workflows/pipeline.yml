@@ -1,0 +1,32 @@
+name: Pipeline CI - Crypto Wallet
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do Código
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Build Wallet Service
+      run: mvn -B package --file wallet/pom.xml -DskipTests
+
+    - name: Build Historico Service
+      run: mvn -B package --file historico-service/pom.xml -DskipTests
+
+    - name: Sucesso
+      if: success()
+      run: echo "Compilação e Build realizados com sucesso! 🚀"
