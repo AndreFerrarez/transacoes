@@ -175,15 +175,16 @@ Pré-requisitos: Docker Desktop com Kubernetes habilitado (`kubectl`).
 2. **Verificar Pods:**
   ```bash
   kubectl get pods --watch
-  Aguarde até que todos estejam com status Running..
+
+Aguarde até que todos estejam com status Running..
 
 3. **Acessar os servicos:**
 
-  RabbitMQ Dashboard: http://localhost:15672
+-RabbitMQ Dashboard: http://localhost:15672
 
-  Wallet Health: http://localhost:8080/actuator/health
+-Wallet Health: http://localhost:8080/actuator/health
 
-  Histórico Health: http://localhost:8081/actuator/health
+-Histórico Health: http://localhost:8081/actuator/health
 
 4. **Encerrar o ambiente:**
   ```bash
