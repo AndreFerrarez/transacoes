@@ -171,3 +171,22 @@ Pré-requisitos: Docker Desktop com Kubernetes habilitado (`kubectl`).
 1. **Subir todo o ecossistema:**
    ```bash
    kubectl apply -f k8s-deployment.yaml
+
+2. **Verificar Pods:**
+  ```bash
+  kubectl get pods --watch
+  Aguarde até que todos estejam com status Running..
+
+3. **Acessar os servicos:**
+
+  RabbitMQ Dashboard: http://localhost:15672
+
+  Wallet Health: http://localhost:8080/actuator/health
+
+  Histórico Health: http://localhost:8081/actuator/health
+
+4. **Encerrar o ambiente:**
+  ```bash
+  kubectl delete -f k8s-deployment.yaml
+
+
