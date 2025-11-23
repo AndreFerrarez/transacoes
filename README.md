@@ -173,7 +173,7 @@ Pré-requisitos: Docker Desktop com Kubernetes habilitado (`kubectl`).
    kubectl apply -f k8s-deployment.yaml
 
 2. **Verificar Pods:**
-  ```bash
+   ```bash
    kubectl get pods --watch
 
 Aguarde até que todos estejam com status Running..
@@ -187,7 +187,7 @@ Aguarde até que todos estejam com status Running..
 -Histórico Health: http://localhost:8081/actuator/health
 
 4. **Encerrar o ambiente:**
-  ```bash
+   ```bash
    kubectl delete -f k8s-deployment.yaml
 
 
