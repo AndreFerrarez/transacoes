@@ -127,3 +127,47 @@ Bancos de dados isolados;
 Estrutura escalável e pronta para futuras integrações.
 
 O sistema está totalmente funcional e preparado para evoluir nas próximas etapas do projeto.
+
+
+---
+# 🚀 Etapa 5 — Implantação e Operação em Produção
+
+![Pipeline CI - Crypto Wallet](https://github.com/AndreFerrarez/transacoes/actions/workflows/pipeline.yml/badge.svg)
+
+## 🎯 Objetivo
+A etapa final focou na preparação do sistema para um ambiente produtivo, garantindo **portabilidade, escalabilidade e confiabilidade**. O sistema deixou de rodar apenas localmente via IDE para ser orquestrado em containers, com monitoramento ativo e pipeline de entrega automatizada.
+
+## 🛠️ O Que Foi Implementado
+
+### 1. 📦 Conteinerização (Docker)
+- Criação de **Dockerfiles** otimizados com *Multi-Stage Build* (separando a fase de compilação Maven da fase de execução com JRE leve).
+- Geração de imagens independentes para `wallet-service` e `historico-service`.
+
+### 2. ☸️ Orquestração (Kubernetes)
+- Desenvolvimento de manifestos (`k8s-deployment.yaml`) para gerenciamento do cluster.
+- Configuração de **Services (LoadBalancer)** para expor as aplicações e o Broker.
+- Definição de variáveis de ambiente dinâmicas para comunicação interna entre pods (Service Discovery).
+
+### 3. 🔍 Monitoramento e Observabilidade
+- Integração com **Spring Boot Actuator**.
+- Exposição de endpoints de saúde (`/actuator/health`) que monitoram em tempo real:
+  - Conectividade com o RabbitMQ.
+  - Estado do Banco de Dados (H2).
+  - Espaço em disco e disponibilidade do serviço.
+
+### 4. 🔄 CI/CD (GitHub Actions)
+- Implementação de pipeline de **Integração Contínua** automatizada.
+- A cada `push` na branch principal, o workflow:
+  1. Baixa o código.
+  2. Configura o ambiente Java 21 (Temurin).
+  3. Executa a compilação e testes de build dos microsserviços.
+
+---
+
+## ⚙️ Como Executar o Ambiente (Kubernetes)
+
+Pré-requisitos: Docker Desktop com Kubernetes habilitado (`kubectl`).
+
+1. **Subir todo o ecossistema:**
+   ```bash
+   kubectl apply -f k8s-deployment.yaml
