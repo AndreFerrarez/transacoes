@@ -1,0 +1,129 @@
+# -------------------
+# 1. RabbitMQ
+# -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:3-management
+        ports:
+        - containerPort: 5672
+        - containerPort: 15672
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+spec:
+  selector:
+    app: rabbitmq
+  ports:
+    - name: amqp
+      protocol: TCP
+      port: 5672
+      targetPort: 5672
+    - name: management
+      protocol: TCP
+      port: 15672
+      targetPort: 15672
+  type: LoadBalancer
+
+---
+# -------------------
+# 2. Historico Service
+# -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: historico-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: historico-service
+  template:
+    metadata:
+      labels:
+        app: historico-service
+    spec:
+      containers:
+      - name: historico-service
+        # Nome exato da sua imagem local
+        image: projetodeblocoengenhariadesoftwaresescalaveis-historico-service:latest
+        imagePullPolicy: Never # IMPORTANTE: Usa a imagem local, não baixa da net
+        ports:
+        - containerPort: 8081
+        env:
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq-service" # Nome do Service do Rabbit definido acima
+        - name: SERVER_PORT
+          value: "8081"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: historico-service
+spec:
+  selector:
+    app: historico-service
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: LoadBalancer
+
+---
+# -------------------
+# 3. Wallet Service
+# -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wallet-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wallet-service
+  template:
+    metadata:
+      labels:
+        app: wallet-service
+    spec:
+      containers:
+      - name: wallet-service
+        # Nome exato da sua imagem local
+        image: projetodeblocoengenhariadesoftwaresescalaveis-wallet-service:latest
+        imagePullPolicy: Never # IMPORTANTE: Usa a imagem local
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_RABBITMQ_HOST
+          value: "rabbitmq-service"
+        - name: HISTORICO_SERVICE_URL
+          value: "http://historico-service:8081"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wallet-service
+spec:
+  selector:
+    app: wallet-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: LoadBalancer
