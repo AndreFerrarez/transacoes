@@ -1,3 +1,4 @@
+![Pipeline CI - Crypto Wallet](https://github.com/AndreFerrarez/transacoes/actions/workflows/pipeline.yml/badge.svg)
 # Projeto Crypto Wallet — Etapa 3
 
 ## 🎯 Objetivo
