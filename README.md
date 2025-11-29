@@ -96,7 +96,7 @@ GET http://localhost:8081/historico
 
 # Tecnologias Utilizadas
 
-Java 21
+Java 17+
 
 Spring Boot 3.5.4
 
@@ -189,5 +189,62 @@ Aguarde até que todos estejam com status Running..
 4. **Encerrar o ambiente:**
    ```bash
    kubectl delete -f k8s-deployment.yaml
+   ```
 
 
+# 🏛️ Arquitetura Final do Projeto
+
+Esta entrega final consolida o sistema em uma **Arquitetura de Microsserviços Distribuída**, rodando inteiramente em **Kubernetes** e atendendo aos requisitos de escalabilidade e poliglota de persistência.
+
+## ✅ Conformidade com os Requisitos da Etapa 5 
+
+| Requisito | Solução Implementada |
+| :--- | :--- |
+| **Microservices** | Sistema composto por 3 serviços: `wallet-service`, `historico-service` e `gateway-service`. |
+| **Docker & K8s** | Todos os serviços containerizados e orquestrados via Deployments e Services no Kubernetes. |
+| **Banco de Dados Híbrido** | **SQL (H2)** para a Wallet (consistência transacional) e **NoSQL (MongoDB)** para o Histórico (alta volumetria). |
+| **API Gateway** | Implementação do **Spring Cloud Gateway** na porta `8082` atuando como Load Balancer e ponto único de entrada. |
+| **Service Discovery** | Utilização do **Kubernetes DNS** nativo para comunicação entre serviços. |
+| **Logs & Tracing** | Rastreamento distribuído via **Micrometer** (TraceID nos logs) e centralização via `kubectl`. |
+
+## 🚀 Como Executar
+Todo o ambiente é subido com um único comando:
+
+```bash
+kubectl apply -f k8s-deployment.yaml
+```
+
+### Testes finais 
+http://localhost:8082/actuator/health
+
+Devera retornar 
+{"status":"UP","groups":["liveness","readiness"]}
+
+- (Moeda: BRL)
+  ```bash
+   Invoke-RestMethod -Method Post -Uri "http://localhost:8082/transacoes" -ContentType "application/json" -Body '{"tipo": "VALIDACAO_BRL", "valor": 100, "moeda": "BRL"}'
+  ```
+- (Moeda: USD)
+  ```bash
+   Invoke-RestMethod -Method Post -Uri "http://localhost:8082/transacoes" -ContentType "application/json" -Body '{"tipo": "VALIDACAO_USD", "valor": 50, "moeda": "USD"}'
+  ```
+- Listar TODO o Histórico
+  ```bash
+   Invoke-RestMethod -Uri "http://localhost:8082/historicos"
+  ```
+### Filtrar apenas por Dólar (USD)
+  ```bash
+   Invoke-RestMethod -Uri "http://localhost:8082/historicos/moeda/USD"
+  ```
+### Buscar pela Transação Original da Wallet
+  ```bash
+   Invoke-RestMethod -Uri "http://localhost:8082/historicos/transacao/{id}"
+  ```
+
+### Endpoints Principais:
+
+Gateway: http://localhost:8082 (Ponto de entrada único)
+
+RabbitMQ: http://localhost:15672
+
+Monitoramento: http://localhost:8082/actuator/health

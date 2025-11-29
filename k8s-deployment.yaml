@@ -42,7 +42,7 @@ spec:
 
 ---
 # -------------------
-# 2. Historico Service
+# 2. Historico Service (Agora com MongoDB)
 # -------------------
 apiVersion: apps/v1
 kind: Deployment
@@ -62,14 +62,17 @@ spec:
       - name: historico-service
         # Nome exato da sua imagem local
         image: projetodeblocoengenhariadesoftwaresescalaveis-historico-service:latest
-        imagePullPolicy: Never # IMPORTANTE: Usa a imagem local, não baixa da net
+        imagePullPolicy: Never 
         ports:
         - containerPort: 8081
         env:
         - name: SPRING_RABBITMQ_HOST
-          value: "rabbitmq-service" # Nome do Service do Rabbit definido acima
+          value: "rabbitmq-service"
         - name: SERVER_PORT
           value: "8081"
+        # Garantia extra de conexao com o Mongo
+        - name: SPRING_DATA_MONGODB_URI
+          value: "mongodb://mongodb:27017/historico-db"
 ---
 apiVersion: v1
 kind: Service
@@ -106,7 +109,7 @@ spec:
       - name: wallet-service
         # Nome exato da sua imagem local
         image: projetodeblocoengenhariadesoftwaresescalaveis-wallet-service:latest
-        imagePullPolicy: Never # IMPORTANTE: Usa a imagem local
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
         env:
@@ -126,4 +129,82 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
+  type: LoadBalancer
+
+---
+# -------------------
+# 4. MongoDB (NOVO - Camada de Dados NoSQL)
+# -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:6.0
+        ports:
+        - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
+  type: ClusterIP # Banco de dados interno, nao precisa de LoadBalancer externo
+
+# -------------------
+  # 5. API Gateway (Porteiro / Load Balancer)
+# -------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+  template:
+    metadata:
+      labels:
+        app: gateway-service
+    spec:
+      containers:
+      - name: gateway-service
+        # Nome da imagem que acabamos de criar
+        image: projetodeblocoengenhariadesoftwaresescalaveis-gateway-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8082
+        env:
+        - name: SERVER_PORT
+          value: "8082"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+spec:
+  selector:
+    app: gateway-service
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
   type: LoadBalancer

@@ -25,16 +25,22 @@ public class HistoricoController {
         if (payload.getDataOperacao() == null) {
             payload.setDataOperacao(LocalDateTime.now());
         }
+        // O ID do Mongo será gerado automaticamente aqui
         return repo.save(payload);
     }
 
     @GetMapping("/transacao/{id}")
     public List<TransacaoHistorico> porTransacao(@PathVariable Long id) {
-        return repo.findByTransacaoIdOrderByDataOperacaoDesc(id);
+        // Chamando o metodo atualizado que busca pelo ID original da wallet
+        return repo.findByTransacaoIdOriginalOrderByDataOperacaoDesc(id);
     }
 
     @GetMapping("/moeda/{moeda}")
     public List<TransacaoHistorico> porMoeda(@PathVariable String moeda) {
         return repo.findByMoedaIgnoreCaseOrderByDataOperacaoDesc(moeda);
+    }
+    @GetMapping
+    public List<TransacaoHistorico> listarTudo() {
+        return repo.findAll();
     }
 }

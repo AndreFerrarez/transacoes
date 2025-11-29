@@ -1,0 +1,26 @@
+server:
+  port: 8082 # Porta do Gateway
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+        # Rota para a Wallet
+        - id: wallet-route
+          uri: http://wallet-service:8080
+          predicates:
+            - Path=/transacoes/**
+
+        # Rota para o Histórico
+        - id: historico-route
+          uri: http://historico-service:8081
+          predicates:
+            - Path=/historicos/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

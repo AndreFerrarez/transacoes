@@ -25,22 +25,28 @@ public class TransacaoEventListener {
         try {
             log.info("[RabbitMQ] Evento recebido: {}", evento);
 
-            Long transacaoId = ((Number) evento.get("transacaoId")).longValue();
+            // 1. Extração dos dados
+            Long idDaWallet = ((Number) evento.get("transacaoId")).longValue();
             String tipo = (String) evento.get("tipo");
             BigDecimal valor = new BigDecimal(evento.get("valor").toString());
             String moeda = (String) evento.get("moeda");
             String operacao = (String) evento.get("operacao");
 
+            // 2. Criação do Objeto MongoDB
             TransacaoHistorico historico = new TransacaoHistorico();
-            historico.setTransacaoId(transacaoId);
+
+            // O MongoDB gera o ID String automaticamente.
+            historico.setTransacaoIdOriginal(idDaWallet);
+
             historico.setTipo(tipo);
             historico.setValor(valor);
             historico.setMoeda(moeda);
             historico.setOperacao(operacao);
             historico.setDataOperacao(LocalDateTime.now());
 
+            // 3. Salva no MongoDB
             repository.save(historico);
-            log.info("[RabbitMQ] Histórico salvo: transacaoId={}, operacao={}", transacaoId, operacao);
+            log.info("[RabbitMQ] Histórico salvo no Mongo: ID Wallet={}, Operação={}", idDaWallet, operacao);
 
         } catch (Exception e) {
             log.error("Erro ao processar evento RabbitMQ: {}", e.getMessage(), e);

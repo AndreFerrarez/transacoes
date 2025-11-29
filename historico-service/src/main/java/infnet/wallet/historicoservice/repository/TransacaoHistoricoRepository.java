@@ -1,13 +1,14 @@
 package infnet.wallet.historicoservice.repository;
 
 import infnet.wallet.historicoservice.model.TransacaoHistorico;
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.mongodb.repository.MongoRepository;
 import java.util.List;
 
-public interface TransacaoHistoricoRepository extends JpaRepository<TransacaoHistorico, Long> {
+public interface TransacaoHistoricoRepository extends MongoRepository<TransacaoHistorico, String> {
 
-    List<TransacaoHistorico> findByTransacaoIdOrderByDataOperacaoDesc(Long transacaoId);
+    // Ajustado para buscar pelo campo novo "transacaoIdOriginal"
+    List<TransacaoHistorico> findByTransacaoIdOriginalOrderByDataOperacaoDesc(Long transacaoIdOriginal);
 
+    // Declarado explicitamente para Controller poder usar
     List<TransacaoHistorico> findByMoedaIgnoreCaseOrderByDataOperacaoDesc(String moeda);
 }
